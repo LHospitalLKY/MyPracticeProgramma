@@ -1,0 +1,7 @@
+{
+    "version": "0.1.0",
+    "command": "g++",
+    "isShellCommand": true,
+    "args": ["-g","/home/lhospital/progamma/CPROGRAMMA/数据结构文件集/二叉树.c"],
+    "showOutput": "always"
+}
