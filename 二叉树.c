@@ -29,12 +29,15 @@ int DepthBiTree(BiTree T);  /*递归求深度*/
 int DepthBiTree_InStack(BiTree T);    /*中序计算二叉树深度*/
 int DepthBiTree_PreStack(BiTree T);     /*前序计算二叉树深度*/
 int DepthBiTree_PostStack(BiTree T);    /*后序计算二叉树*/
+BiTree DeleteBT(BiTree &T, char item);   /*删除二叉树的结点*/
+BiTree ExchangeBT(BiTree &T);   /*交换二叉树中所有结点左右子树的位置*/
 
 
 int main()
 {
-    BiTree T, T_compare;
+    BiTree T, T_compare, T_exchange, T_delete;
     int compare_coeff1, compare_coeff2, clear_coeff, depth;
+    char item;
 
     printf("Please input the Binary Tree:\n");
     T = CreateBiTree(T);
@@ -74,14 +77,23 @@ int main()
     depth = DepthBiTree_PostStack(T);
     printf("The depth of this binary tree is %d\n", depth);
 
+    T_exchange = ExchangeBT(T);
+    printf("Exchange the position of left-child and right-child: ");
+    PreOrde(T_exchange);
+    printf("\n");
+
+    scanf("%c", &item);     //这里为什么要两次使用scanf我也不清楚，只是这样做能得到最后的结果
+    scanf("%c", &item);
+    T_delete = DeleteBT(T, item);
+    printf("Delete the element %c and the subtree whoes root is %c:", item, item);
+    PreOrde(T_delete);
+    printf("\n");
+
     clear_coeff = ClearBiTree(T);
     if (clear_coeff == 1)
         printf("The binary tree is already clear");
     printf("\n");
-    
-
-
-    
+   
     /*compare_coeff1 = Similar(T, T_compare);     //测试别的代码时将这段注释掉
     if (compare_coeff1 == 1)
         printf("These two binary tree is similar!\n");
@@ -419,4 +431,109 @@ int DepthBiTree_PostStack(BiTree T)
         }while (!(p == NULL && top == -1));
     }
     return maxdepth;
+}
+
+/*求结点层数
+假设二叉树中存在data值为item的点，并且不超过1个。
+求结点层数的问题适合使用后序遍历。当找到满足条件的
+点时，只要将堆栈中保留的元素个数加1即可得到该节点的层次数*/
+int LayerBT(BiTree T, char item)
+{
+    BiTree M1[Max], p;
+    int M2[Max], flag, top;
+
+    p = T;
+    top = -1;
+
+    if (T != NULL)
+    {
+        do{
+            while (p != NULL)
+            {
+                M1[++top] = p;
+                M2[top] = 0;
+                p = p -> lchild;
+            }
+
+            p = M1[top];
+            flag = M2[top--];
+            if (flag == 0)
+            {
+                M1[++top] = p;
+                M2[top] = 1;
+                p = p -> rchild;
+            }
+            else
+            {
+                if (p -> data == item)
+                    return(top + 2);
+                p = NULL;
+            }
+        }while (!(p == NULL && top == -1));
+    }
+}
+/*删除并释放该二叉树中满足特定条件的结点的数据域的内容和以其为树根的子树，使用后序遍历*/
+BiTree DeleteBT(BiTree &T, char item)
+{
+    BiTree M[Max], p, q;
+    int top = -1;
+    p = T; q = T;
+    
+    if (T -> data == item)
+    {
+        Destroy(T);
+        return NULL;
+    }
+    else
+    {
+        do{
+            while (p != NULL)
+            {
+                if (p -> data == item)
+                {
+                    if (q -> lchild == p)
+                        q -> lchild = NULL;
+                    else
+                        q -> rchild = NULL;
+                    Destroy(p);
+                    return T;
+                }
+                M[++top] = p;
+                q = p;
+                p = p -> lchild;
+            }
+            p = M[top--];
+            q = p;
+            p = p -> rchild;
+        }while (!(p == NULL && top == -1));
+    }
+
+}
+
+/*交换所有节点左右子树的位置*/
+BiTree ExchangeBT(BiTree &T)
+{
+    BiTree Q[Max], temp, p;
+    int front, rear;
+    if (T != NULL)
+    {
+        Q[0] = T;
+        p = T;
+        front = -1;
+        rear = 0;
+        while (front < rear)
+        {
+            p = Q[++front];
+            temp = p -> lchild;
+            p -> lchild = p -> rchild;
+            p -> rchild = temp;
+            
+            if (p -> lchild != NULL)
+                Q[++rear] = p -> lchild;
+            if (p -> rchild != NULL)
+                Q[++rear] = p -> rchild;
+        }
+
+        return T;
+    }
 }
